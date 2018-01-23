@@ -1,0 +1,10 @@
+<!--pages/biz/configure.wxml-->
+<view>
+  <view>题目数量:</view>
+  <input value='12' class='ipt' type='number' bindinput='modifyPbNumIpt' maxlength='2'></input>
+  <view>奖金数量:</view>
+  <input value='100' class='ipt' type='number' bindinput='modifyMnNumIpt' maxlength='4'></input>
+  <view>
+    <button size='default' type='primary' bindtap='goConfigureDetailTap'>开始出题</button>
+  </view>
+</view>

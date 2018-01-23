@@ -1,0 +1,38 @@
+/* pages/biz/addProblems.wxss */
+
+textarea {
+  border: #233 solid 1rpx;
+}
+
+input {
+  border: #233 solid 1rpx;
+  height: 35rpx;
+}
+
+button {
+  margin-left: 5rpx;
+}
+
+.pickerVal {
+  border-bottom: #255 solid 1rpx;
+}
+
+.centerBlock {
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10rpx;
+  border: salmon solid 1rpx;
+  display: flex
+}
+
+.btn {
+  border-radius: 5%;
+  width: 40%;
+  border: #233 solid 1rpx;
+  margin-left: 2%;
+  float: left;
+  text-align: center;
+  margin-top: 5rpx;
+  background-color: #f81;
+  font-size: 31rpx;
+}

@@ -1,0 +1,15 @@
+{
+  "pages":[
+    "pages/index/index",
+    "pages/logs/logs",
+    "pages/biz/configure",
+    "pages/biz/answer",
+    "pages/biz/addProblems"
+  ],
+  "window":{
+    "backgroundTextStyle":"light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "全民答题",
+    "navigationBarTextStyle":"black"
+  }
+}

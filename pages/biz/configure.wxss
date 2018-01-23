@@ -1,0 +1,8 @@
+/* pages/biz/configure.wxss */
+
+.ipt {
+  border: #233 solid 0.5rpx;
+  height: 70rpx;
+  margin-top: 10rpx;
+  margin-bottom: 5rpx;
+}
