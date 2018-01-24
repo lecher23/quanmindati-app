@@ -1,0 +1,15 @@
+/* pages/cli/answerProblems.wxss */
+
+.unselect {
+  width: 100%;
+  border: #ff1 solid 1rpx 5%;
+  background-color: #CDF;
+  margin-bottom: 10rpx;
+}
+
+.selected {
+  width: 100%;
+  border: #ff1 solid 1rpx 5%;
+  background-color: #BF6;
+  margin-bottom: 10rpx;
+}

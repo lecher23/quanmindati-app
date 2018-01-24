@@ -5,7 +5,8 @@
     "pages/biz/configure",
     "pages/biz/answer",
     "pages/biz/addProblems",
-    "pages/cli/managerProblems"
+    "pages/cli/managerProblems",
+    "pages/cli/answerProblems"
   ],
   "window":{
     "backgroundTextStyle":"light",

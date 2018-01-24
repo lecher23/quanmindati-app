@@ -1,0 +1,14 @@
+<!--pages/cli/answerProblems.wxml-->
+<view>
+处理中...
+</view>
+
+<view>当前状态: {{roomStatus}}</view>
+
+<view wx:if="{{ready}}">
+  <view>题目内容:</view>
+  <text>{{problem.content}}</text>
+  <view wx:for="{{problem.choice}}" wx:key='idx'>
+    <button class='{{item.cls}}' id="{{item.idx}}" bindtap='clickChoiceTap'>选项{{item.val}}</button>
+  </view>
+</view>
