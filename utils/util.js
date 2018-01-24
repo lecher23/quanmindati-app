@@ -20,5 +20,6 @@ const trim = s => {
 
 module.exports = {
   formatTime: formatTime,
-  trim: trim
+  trim: trim,
+  wsAddr: 'wss://xxx.xxx.xxx/x/x'
 }
