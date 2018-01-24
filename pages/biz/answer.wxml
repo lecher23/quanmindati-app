@@ -1,7 +1,7 @@
 <!--pages/biz/answer.wxml-->
 <view style='margin-bottom:20rpx'>
 <view>请输入房间号:</view>
-<input class='ipt' value='000000' maxlength='6' type='number'></input>
+<input class='ipt' value='' maxlength='6' type='number' bindinput='setRoomCodeIpt'></input>
 
 </view>
-<button type='primary'>进入房间</button>
+<button type='primary' bindtap='enterRoomTap'>进入房间</button>

@@ -4,7 +4,8 @@
     "pages/logs/logs",
     "pages/biz/configure",
     "pages/biz/answer",
-    "pages/biz/addProblems"
+    "pages/biz/addProblems",
+    "pages/cli/managerProblems"
   ],
   "window":{
     "backgroundTextStyle":"light",

@@ -39,5 +39,8 @@ App({
       problemNumber: 2,
       rewards: 100
     }
+  },
+  gData: {
+    enterCode: ''
   }
 })

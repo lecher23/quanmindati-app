@@ -1,88 +1,82 @@
-// pages/biz/answer.js
-var app = getApp()
+// pages/cli/managerProblems.js
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-
+    onlineCliNum: 0,
+    roomExist: false,
+    watingResponse: true,
+    debugTimer: null
   },
 
-  setRoomCodeIpt: function (e) {
-    app.gData.enterCode = e.detail.value;
-  },
-
-  enterRoomTap: function () {
-    var codeLen = app.gData.enterCode.length;
-    if (codeLen == 4) {
-      wx.navigateTo({
-        url: '../cli/managerProblems?code=' + app.gData.enterCode,
-      })
-      // 请求后台，如果房间为管理者，那么进入管理页面
-      // 请求后台，如果房间为答题者，那么进入答题页面
-    } else if (codeLen == 6){
-      wx.navigateTo({
-        url: '../cli/answerProblems?code=' + app.gData.enterCode,
-      })
-    }else{
-      console.log('to be continued.')
-    }
+  goBackTap: ()=> {
+    wx.navigateBack({
+    })
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-
+    self = this
+    console.log('onLoad..')
+    self.data.debugTimer = setInterval(()=>{
+      console.log('timer evnet.')
+      self.setData({ watingResponse: false})
+      clearInterval(self.data.debugTimer)
+    }, 2000)
   },
 
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady: function () {
-
+  
   },
 
   /**
    * 生命周期函数--监听页面显示
+   * 打开ws连接
    */
   onShow: function () {
-
+    console.log('open ws conn.')
   },
 
   /**
    * 生命周期函数--监听页面隐藏
+   * 断开ws连接
    */
   onHide: function () {
-
+    console.log('onHide: close ws conn.')
   },
 
   /**
    * 生命周期函数--监听页面卸载
    */
   onUnload: function () {
-
+    console.log('onUnload: close ws conn.')
   },
 
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */
   onPullDownRefresh: function () {
-
+  
   },
 
   /**
    * 页面上拉触底事件的处理函数
    */
   onReachBottom: function () {
-
+  
   },
 
   /**
    * 用户点击右上角分享
    */
   onShareAppMessage: function () {
-
+  
   }
 })

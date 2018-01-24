@@ -1,0 +1,7 @@
+<!--pages/cli/managerProblems.wxml-->
+<view>
+  <view wx:if="{{watingResponse}}">获取中...</view>
+  <button type='warn' wx:if="{{!roomExist && !watingResponse}}" bindtap='goBackTap'>不存在, 请返回</button>
+  <button wx:if="{{roomExist && !watingResponse}}" type='default'>开启答题</button>
+  <view wx:if="{{roomExist && !watingResponse}}">当前在线:{{onlineCliNum}}</view>
+</view>
