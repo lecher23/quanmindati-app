@@ -1,10 +1,12 @@
 <!--pages/cli/answerProblems.wxml-->
-<view>
+<view wx:if="{{processing}}">
 处理中...
 </view>
 
 <view>当前状态: {{roomStatus}}</view>
 
+<button style='primary' wx:if="{{user == roomOwner && stepCode == 0}}" bindtap='startRoomTap'>开始答题</button>
+<text wx:if="{{ready}}">倒计时: {{counter}}</text>
 <view wx:if="{{ready}}">
   <view>题目内容:</view>
   <text>{{problem.content}}</text>

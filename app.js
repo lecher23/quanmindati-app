@@ -1,6 +1,8 @@
 //app.js
 App({
   onLaunch: function () {
+    var s = '{"code": 3, "data": {"duration": 0, "owner": "oqBAK0bG0dVdWCQfc8G812Q1cM-w", "enable": true, "history": null, "st": 0}}'
+    console.log(JSON.parse(s))
     // 展示本地存储能力
     var self = this
     var logs = wx.getStorageSync('logs') || []

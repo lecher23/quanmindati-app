@@ -82,7 +82,7 @@ Page({
         header: {'content-type': 'application/json'},
         success: function(res){
           console.log(res)
-          if (!res.data.code){
+          if (res.data.code == 200){
             self.setData({code: res.data.data})
           } else {
             self.setData({processing: false})
