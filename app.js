@@ -2,16 +2,47 @@
 App({
   onLaunch: function () {
     // 展示本地存储能力
+    var self = this
     var logs = wx.getStorageSync('logs') || []
     logs.unshift(Date.now())
     wx.setStorageSync('logs', logs)
-
+    var user = wx.getStorageSync("user") || {}
+    console.log(user)
+    var userInfo = wx.getStorageSync('userInfo') || {}
+    console.log(userInfo)
+    if (!user.openid) {
+      console.log('get user info')
+      wx.login({
+        success: function (res) {
+          if (res.code) {
+            var d = self.globalData
+            var l = 'https://debug.daily2fun.com/qqq/api/user?code=' + res.code
+            wx.request({
+              url: l,
+              success: res => {
+                if (!res.data.code) {
+                  var obj = {}
+                  obj.openid = res.data.data
+                  console.log(obj)
+                  wx.setStorageSync('user', obj)
+                }
+              }
+            })
+          } else {
+            consold.log('get user login status failed.' + res.errMsg)
+          }
+        }
+      })
+    }
+    /**
     // 登录
     wx.login({
       success: res => {
         // 发送 res.code 到后台换取 openId, sessionKey, unionId
       }
     })
+        */
+
     // 获取用户信息
     wx.getSetting({
       success: res => {
@@ -36,7 +67,7 @@ App({
   globalData: {
     userInfo: null,
     drawConf: {
-      problemNumber: 2,
+      problemNumber: 12,
       rewards: 100
     }
   },

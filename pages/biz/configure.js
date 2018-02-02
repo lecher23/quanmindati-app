@@ -16,6 +16,7 @@ Page({
   },
 
   modifyPbNumIpt: function(e){
+    console.log(e.detail.value)
     app.globalData.drawConf.problemNumber = parseInt(e.detail.value)
   },
 

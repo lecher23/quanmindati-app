@@ -1,6 +1,6 @@
 <!--pages/biz/addProblems.wxml-->
 <view>
-  <view>当前第{{ problemIdx + 1 }}道题目</view>
+  <view>当前第{{ problemIdx + 1 }}/{{ problemCount }}道题目</view>
   <view>题目内容:</view>
   <textarea placeholder='请输入题目内容' maxlength='255' auto-height='true' bindinput='setContentIpt' value='{{curContent}}'></textarea>
   <view wx:for="{{choiceCount}}" wx:key="x">
@@ -13,6 +13,7 @@
     <button class='picker'>正确答案: {{ rightAnswerIdx + 1}}</button>
   </picker>
 
-  <button size='default' type='default' bindtap='prePbTap'> 上一题</button>
-  <button size='default' type='default' bindtap='nextPbTap'> {{nextTitle}}</button>
+  <button wx:if="{{!processing}}" size='default' type='default' bindtap='prePbTap'> 上一题</button>
+  <button wx:if="{{!processing}}" size='default' type='default' bindtap='nextPbTap'> {{nextTitle}}</button>
+  <text wx:if="{{code}}">创建成功! 房间码: {{code}}</text>
 </view>

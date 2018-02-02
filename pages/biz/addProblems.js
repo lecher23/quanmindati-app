@@ -7,8 +7,8 @@ Page({
    * 页面的初始数据
    */
   data: {
-    rewards: app.globalData.drawConf.rewards,
-    problemCount: app.globalData.drawConf.problemNumber,
+    rewards: 0,
+    problemCount: 0,
     problemIdx: 0,
     choiceCount: [{ x: 0, y: '' }, { x: 1, y: '' }],
     pickerAry: [1, 2],
@@ -16,10 +16,13 @@ Page({
     problems: [{
       content: null,
       index: 0,
-      choice: [null, null]
+      choice: [null, null],
+      answer: 0
     }],
     curContent: '',
-    nextTitle: "下一题"
+    nextTitle: app.globalData.drawConf.problemNumber == 1 ? "完成" : "下一题",
+    processing: false,
+    code: null
   },
 
   curPb: function () {
@@ -52,6 +55,7 @@ Page({
     }
   },
   nextPbTap: function () {
+    var self = this
     if (!this.checkProblem()) {
       wx.showToast({
         title: '题目信息未完善!',
@@ -63,12 +67,32 @@ Page({
     }
     if (this.data.nextTitle == '下一题') {
       this.doNextPb();
-    }else {
-      console.log('submit to server');
+    } else if(!this.data.processing) {
+      var user = wx.getStorageSync("user")
+      console.log(this.data.problems)
+      var pbObj = {
+        reward: this.data.rewards,
+        question: this.data.problems
+      }
+      self.setData({processing: true})
+      wx.request({
+        url: "https://debug.daily2fun.com/qqq/api/create",
+        data: {'u': user.openid, 'd': pbObj},
+        method: "POST",
+        header: {'content-type': 'application/json'},
+        success: function(res){
+          console.log(res)
+          if (!res.data.code){
+            self.setData({code: res.data.data})
+          } else {
+            self.setData({processing: false})
+          }
+        }
+      })
     }
   },
 
-  doNextPb: function() {
+  doNextPb: function () {
     if (this.data.problems.length < this.data.problemCount) {
       var newPbIdx = this.data.problemIdx + 1;
       this.data.problems.push({ content: null, index: newPbIdx, choice: [null, null] })
@@ -110,8 +134,10 @@ Page({
   },
 
   answerPkrChange: function (e) {
+    var pb = this.curPb();
+    pb.answer = parseInt(e.detail.value)
     this.setData({
-      rightAnswerIdx: parseInt(e.detail.value)
+      rightAnswerIdx: pb.answer
     })
   },
 
@@ -163,21 +189,25 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-
+    console.log(app.globalData)
+    this.setData({ 
+      problemCount: app.globalData.drawConf.problemNumber,
+      rewards: app.globalData.drawConf.rewards,
+      nextTitle: app.globalData.drawConf.problemNumber == 1? "完成" : "下一题"
+       })
   },
 
   /**
    * 生命周期函数--监听页面初次渲染完成
    */
   onReady: function () {
-
   },
 
   /**
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-    console.log(app.globalData.userInfo)
+    //console.log(app.globalData.userInfo)
   },
 
   /**
