@@ -13,3 +13,11 @@
   background-color: #BF6;
   margin-bottom: 10rpx;
 }
+
+.wrong {
+  width: 100%;
+  border: #ff1 solid 1rpx 5%;
+  background-color: red;
+  margin-bottom: 10rpx;
+}
+

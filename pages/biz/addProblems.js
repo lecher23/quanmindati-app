@@ -95,7 +95,7 @@ Page({
   doNextPb: function () {
     if (this.data.problems.length < this.data.problemCount) {
       var newPbIdx = this.data.problemIdx + 1;
-      this.data.problems.push({ content: null, index: newPbIdx, choice: [null, null] })
+      this.data.problems.push({ content: null, index: newPbIdx, choice: [null, null], answer: 0 })
       this.setData({
         problemIdx: newPbIdx,
         curContent: '',

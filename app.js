@@ -22,7 +22,7 @@ App({
             wx.request({
               url: l,
               success: res => {
-                if (!res.data.code) {
+                if (res.data.code == 200) {
                   var obj = {}
                   obj.openid = res.data.data
                   console.log(obj)

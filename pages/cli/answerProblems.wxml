@@ -1,14 +1,15 @@
 <!--pages/cli/answerProblems.wxml-->
 <view wx:if="{{processing}}">
-处理中...
+  处理中...
 </view>
-
-<view>当前状态: {{roomStatus}}</view>
-
-<button style='primary' wx:if="{{user == roomOwner && stepCode == 0}}" bindtap='startRoomTap'>开始答题</button>
+<view>debug: {{stepCode}}|{{choiceIdx}}</view>
+<text>当前状态: {{roomStatus}}</text>
+<view>房主: {{roomOwner}}</view>
+<view>通知: {{roomMsg}}</view>
+<button style='primary' wx:if="{{user == roomOwner && stepCode == 0 && showStartBtn}}" bindtap='startRoomTap'>开始答题</button>
 <text wx:if="{{ready}}">倒计时: {{counter}}</text>
 <view wx:if="{{ready}}">
-  <view>题目内容:</view>
+  <view>第 {{problem.index + 1}} 题:</view>
   <text>{{problem.content}}</text>
   <view wx:for="{{problem.choice}}" wx:key='idx'>
     <button class='{{item.cls}}' id="{{item.idx}}" bindtap='clickChoiceTap'>选项{{item.val}}</button>

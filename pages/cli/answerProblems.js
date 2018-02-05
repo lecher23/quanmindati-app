@@ -11,7 +11,7 @@ Page({
     roomStatus: '等待中...',
     problem: null,
     ready: false,
-    choicedIdx: undefined,
+    choicedIdx: null,
     wsConn: null,
     debugTimer: null,
     roomId: null,
@@ -20,14 +20,18 @@ Page({
     stepDuration: 0,
     counter: 0,
     roomOwner: null,
-    requesting: false
+    requesting: false,
+    showStartBtn: true,
+    responseCallback: null,
+    roomMsg: '',
+    answerEnabled: true
   },
 
   resetTimer: function () {
     var self = this;
     clearInterval(this.data.timer);
     self.data.timer = setInterval(function () {
-      self.setData({ counter: self.data.counter - 1 })
+      if (self.data.counter > 0) self.setData({ counter: self.data.counter - 1 })
     }, 1100)
   },
 
@@ -36,61 +40,116 @@ Page({
     // 不同的是 快照数据会带当前读秒计数: counter, 同时又enable 字段标志用户是否可以答题
     console.log(data)
     var self = this;
-    self.setData({
+    data.owner ? self.setData({
       roomOwner: data.owner,
+      counter: data.duration,
+      stepCode: data.st
+    }) : self.setData({
       counter: data.duration,
       stepCode: data.st
     })
     if (data.st == 1) {
       // 开始倒计时
       self.resetTimer()
+      self.setData({ roomStatus: '开始倒计时...' })
     } else if (data.st == 2) {
+      self.setData({ roomStatus: '开始答题...' })
       // 答题时间
       var pb = {
         content: data.data.content,
-        choice: Array()
+        choice: Array(),
+        index: data.data.index
       }
       var ops = data.data.options;
-      for (var i = 0; i< ops.length; ++i) {
+      for (var i = 0; i < ops.length; ++i) {
         pb.choice.push({ idx: ops[i].idx, val: ops[i].val, cls: 'unselect' })
       }
       console.log(pb)
       self.setData({
         problem: pb,
-        ready: true
+        ready: true,
+        choicedIdx: null
       })
       self.resetTimer()
+    } else if (data.st == 3) {
+      // 等待结果揭晓
+      self.setData({ roomStatus: '等待结果...' })
+    } else if (data.st == 4) {
+      self.setData({ roomStatus: '结果揭晓...' })
+      if (data.data.answer != self.data.choicedIdx) {
+        var pb = self.data.problem
+        for (var i = 0; i < pb.choice.length; ++i)
+          if (i == data.data.answer) pb.choice[i].cls = 'selected'
+          else if (i == self.data.choicedIdx) pb.choice[i].cls = 'wrong'
+        self.setData({
+          answerEnabled: false,
+          roomMsg: '回答错误!',
+          problem: pb
+        })
+      }
+    } else if (data.st == 5) {
+      self.setData({ roomStatus: '总结...' })
+    } else if (data.st == 6) {
+      self.setData({ roomStatus: '等待关闭...' })
     }
   },
 
-  ezSendMsg: function (data) {
+  ezSendMsg: function (data, okFunc, failFunc) {
+    var self = this;
     if (this.data.requesting) return false;
     this.data.wsConn.send({
       data: data,
       success: function (res) {
+        console.log('Send data:' + data + ', success.')
         console.log(res)
+        // 设置下一次响应执行的处理方法
+        self.setData({ responseCallback: okFunc ? okFunc : (obj) => { self.setData({ roomMsg: '请求成功' }) } })
       },
       fail: function (res) {
-        console.log(res)
+        if (failFunc) failFunc(res)
+        else console.log(res)
       }
     })
     return true;
   },
 
   startRoomTap: function (e) {
-    this.ezSendMsg('{"t": 2}')
+    var self = this;
+    self.setData({ showStartBtn: false })
+    self.ezSendMsg('{"t": 2}', (success, data) => { if (!success) self.setData({ roomMsg: data }) }, (obj) => { self.setData({ showStartBtn: true, roomMsg: '请求失败' }) })
   },
 
   clickChoiceTap: function (e) {
-    console.log(e)
-    if (typeof (this.data.choicedIdx) == 'undefined') {
-      var pb = this.data.problem
-      var choiced = pb.choice[parseInt(e.currentTarget.id)]
-      choiced.cls = 'selected'
-      this.setData({
-        problem: pb,
-        choicedIdx: choiced
-      })
+    var self = this;
+    var d = this.data
+    if (d.stepCode == 2 && d.choicedIdx === null && d.answerEnabled) {
+      // 答题时间,并且本题之前没有回答过
+      var pb = d.problem
+      var answerIdx = parseInt(e.currentTarget.id);
+      var choiced = pb.choice[answerIdx]
+      // 发送答题请求
+      this.ezSendMsg(
+        '{"t":1, "d":{"q":' + pb.index + ', "a": ' + answerIdx + '}}',
+        (success, obj) => {
+          if (success) {
+            choiced.cls = 'selected'
+            self.setData({
+              problem: pb,
+              choicedIdx: answerIdx,
+              roomMsg: '答题成功'
+            })
+          } else {
+            self.setData({
+              roomMsg: obj
+            })
+          }
+        },
+        (obj) => {
+          self.setData({
+            roomMsg: '答题失败',
+          })
+          self.data.choiceIdx = null
+        })
     }
   },
 
@@ -134,17 +193,25 @@ Page({
         if (obj.code == 3) {
           //快照消息
           self.processStatusMessage(obj.data, true)
-        } else if (obj.code == 2){
+        } else if (obj.code == 2) {
           // 状态转换消息
           self.processStatusMessage(obj.data, false)
-        }else if (obj.code == 200) {
+        } else if (obj.code == 200) {
           // 请求成功响应
           console.log('request success')
-          self.setData({ requesting: false })
+          self.data.responseCallback(true, obj.data)
+          self.setData({
+            responseCallback: null,
+            requesting: false
+          })
         } else if (obj.code == 500) {
           // 请求失败响应
           console.log('request failed.')
-          self.setData({ requesting: false })
+          self.data.responseCallback(false, obj.msg)
+          self.setData({
+            responseCallback: null,
+            requesting: false
+          })
         }
       })
     this.data.wsConn.onClose(function (errMsg) {
