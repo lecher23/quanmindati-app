@@ -2,9 +2,7 @@
 <view wx:if="{{processing}}">
   处理中...
 </view>
-<view>debug: {{stepCode}}|{{choiceIdx}}</view>
 <text>当前状态: {{roomStatus}}</text>
-<view>房主: {{roomOwner}}</view>
 <view>通知: {{roomMsg}}</view>
 <button style='primary' wx:if="{{user == roomOwner && stepCode == 0 && showStartBtn}}" bindtap='startRoomTap'>开始答题</button>
 <text wx:if="{{ready}}">倒计时: {{counter}}</text>

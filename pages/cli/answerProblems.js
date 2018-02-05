@@ -76,11 +76,17 @@ Page({
       self.setData({ roomStatus: '等待结果...' })
     } else if (data.st == 4) {
       self.setData({ roomStatus: '结果揭晓...' })
-      if (data.data.answer != self.data.choicedIdx) {
+      var rd = data.data
+      if (rd.answer != self.data.choicedIdx) {
         var pb = self.data.problem
-        for (var i = 0; i < pb.choice.length; ++i)
-          if (i == data.data.answer) pb.choice[i].cls = 'selected'
-          else if (i == self.data.choicedIdx) pb.choice[i].cls = 'wrong'
+        var choice = pb.choice
+        for (var i = 0; i < choice.length; ++i){
+          if (i == rd.answer) choice[i].cls = 'selected'
+          else if (i == self.data.choicedIdx) choice[i].cls = 'wrong'
+          choice[i].val = choice[i].val + '(0)'
+          for (var idx in rd.detail) if (idx == i) choice[i].val = choice[i].val + '(' + rd.detail[idx] + ')' 
+        }
+          
         self.setData({
           answerEnabled: false,
           roomMsg: '回答错误!',
