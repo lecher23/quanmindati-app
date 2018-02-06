@@ -22,7 +22,8 @@ Page({
     curContent: '',
     nextTitle: app.globalData.drawConf.problemNumber == 1 ? "完成" : "下一题",
     processing: false,
-    code: null
+    code: null,
+    createMessage: null
   },
 
   curPb: function () {
@@ -85,7 +86,7 @@ Page({
           if (res.data.code == 200){
             self.setData({code: res.data.data})
           } else {
-            self.setData({processing: false})
+            self.setData({processing: false, createMessage: res.data.msg})
           }
         }
       })

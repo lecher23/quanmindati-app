@@ -36,19 +36,59 @@ Page({
     }, 1100)
   },
 
+  resetProblem: function (data, history) {
+    var pb = {
+      content: data.content,
+      choice: Array(),
+      index: data.index
+    }
+    var ops = data.options;
+    for (var i = 0; i < ops.length; ++i) {
+      pb.choice.push({ idx: ops[i].idx, val: ops[i].val, cls: 'unselect' })
+    }
+    if (history !== null) pb.choice[history].cls = 'selected'
+    this.setData({
+      problem: pb,
+      ready: true,
+      choicedIdx: history
+    })
+  },
+
+  updateChoice: function (data, problem) {
+    var choice = problem.choice
+    for (var i = 0; i < choice.length; ++i) {
+      if (i == data.answer) choice[i].cls = 'selected'
+      else if (i == this.data.choicedIdx) choice[i].cls = 'wrong'
+      var suffix = '(0)'
+      for (var idx in data.detail) if (idx == i) suffix = '(' + data.detail[idx] + ')'
+      choice[i].val = choice[i].val + suffix
+    }
+
+    var passed = data.answer != this.data.choicedIdx
+    this.setData({
+      answerEnabled: !passed,
+      roomMsg: passed ? '答对了!' : '回答错误!',
+      problem: problem
+    })
+  },
+
+  updateUserStatus: function (data) {
+    this.data.answerEnabled = data.enable
+    var remainCounter = data.duration - data.counter
+    this.setData({
+      roomOwner: data.owner,
+      counter: remainCounter > 0 ? remainCounter : 0,
+      stepCode: data.st
+    })
+  },
+
   processStatusMessage: function (data, bSnapshot) {
     // 处理状态相关数据: 快照以及状态转换通知
     // 不同的是 快照数据会带当前读秒计数: counter, 同时又enable 字段标志用户是否可以答题
     console.log(data)
     var self = this;
-    data.owner ? self.setData({
-      roomOwner: data.owner,
-      counter: data.duration,
-      stepCode: data.st
-    }) : self.setData({
-      counter: data.duration,
-      stepCode: data.st
-    })
+    if (bSnapshot) this.updateUserStatus(data)
+    else self.setData({ counter: data.duration, stepCode: data.st })
     self.resetTimer()
     if (data.st == 1) {
       // 开始倒计时
@@ -56,45 +96,26 @@ Page({
     } else if (data.st == 2) {
       self.setData({ roomStatus: '开始答题...' })
       // 答题时间
-      var pb = {
-        content: data.data.content,
-        choice: Array(),
-        index: data.data.index
-      }
-      var ops = data.data.options;
-      for (var i = 0; i < ops.length; ++i) {
-        pb.choice.push({ idx: ops[i].idx, val: ops[i].val, cls: 'unselect' })
-      }
-      console.log(pb)
-      self.setData({
-        problem: pb,
-        ready: true,
-        choicedIdx: null
-      })
+      this.resetProblem(data.data, bSnapshot ? data.history : null)
     } else if (data.st == 3) {
       // 等待结果揭晓
       self.setData({ roomStatus: '等待结果...' })
+      if (bSnapshot) this.resetProblem(data.data, data.history)
     } else if (data.st == 4) {
       self.setData({ roomStatus: '结果揭晓...' })
       var rd = data.data
-      var pb = self.data.problem
-      var choice = pb.choice
-      for (var i = 0; i < choice.length; ++i) {
-        if (i == rd.answer) choice[i].cls = 'selected'
-        else if (i == self.data.choicedIdx) choice[i].cls = 'wrong'
-        var suffix = '(0)'
-        for (var idx in rd.detail) if (idx == i) suffix = '(' + rd.detail[idx] + ')'
-        choice[i].val = choice[i].val + suffix
+      if (bSnapshot) {
+        this.resetProblem(rd, data.history)
+        this.updateChoice(data.result, self.data.problem)
+      } else {
+        // 其他
+        this.updateChoice(rd, self.data.problem)
       }
 
-      var passed = rd.answer != self.data.choicedIdx
-      self.setData({
-        answerEnabled: !passed,
-        roomMsg: passed ? '答对了!' : '回答错误!',
-        problem: pb
-      })
-
     } else if (data.st == 5) {
+      //var debugData = Array()
+      //for (var i = 0; i < 20; ++i) debugData.push(data.data.passed[0])
+      //data.data.passed = debugData
       self.setData({
         roomStatus: '答题结束...',
         result: data.data,
@@ -182,14 +203,20 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow: function () {
-    var self = this
     var user = wx.getStorageSync("user")
-    self.setData({ user: user.openid })
+    this.setData({ user: user.openid })
+    this.initWsConn()
+  },
+
+  initWsConn: function() {
+    var self = this;
+    var user = wx.getStorageSync("user")
     this.data.wsConn = wx.connectSocket({
       url: util.wsAddr + '?r=' + this.data.roomId + '&u=' + user.openid,
       success: function (res) {
+        console.log(res)
         self.setData({
-          roomStatus: '连接成功',
+          roomStatus: '连接成功, 等待开始...',
           processing: false,
           roomExist: true
         })
@@ -197,39 +224,44 @@ Page({
       fail: function (res) {
         self.setData({ roomStatus: "服务器错误" })
       }
-    }),
-      this.data.wsConn.onMessage(function (msg) {
+    })
+    this.data.wsConn.onMessage(function (msg) {
+      var obj = JSON.parse(msg.data)
+      if (obj.code == 3) {
+        //快照消息
         console.log(msg)
-        var obj = JSON.parse(msg.data)
-        if (obj.code == 3) {
-          //快照消息
-          self.processStatusMessage(obj.data, true)
-        } else if (obj.code == 2) {
-          // 状态转换消息
-          self.processStatusMessage(obj.data, false)
-        } else if (obj.code == 200) {
-          // 请求成功响应
-          console.log('request success')
-          self.data.responseCallback(true, obj.data)
-          self.setData({
-            responseCallback: null,
-            requesting: false
-          })
-        } else if (obj.code == 500) {
-          // 请求失败响应
-          console.log('request failed.')
-          self.data.responseCallback(false, obj.msg)
-          self.setData({
-            responseCallback: null,
-            requesting: false
-          })
-        }
-      })
+        self.processStatusMessage(obj.data, true)
+      } else if (obj.code == 2) {
+        console.log(msg)
+        // 状态转换消息
+        self.processStatusMessage(obj.data, false)
+      } else if (obj.code == 200) {
+        // 请求成功响应
+        console.log('request success')
+        self.data.responseCallback(true, obj.data)
+        self.setData({
+          responseCallback: null,
+          requesting: false
+        })
+      } else if (obj.code == 500) {
+        // 请求失败响应
+        console.log('request failed.')
+        self.data.responseCallback(false, obj.msg)
+        self.setData({
+          responseCallback: null,
+          requesting: false
+        })
+      }
+    })
     this.data.wsConn.onClose(function (errMsg) {
-      self.setData({
-        roomStatus: '房间不存在',
-        processing: false
-      })
+      console.log(errMsg)
+      if (errMsg.code == 4100)
+        self.setData({
+          roomStatus: '房间不存在',
+          processing: false
+        })
+      else if (self.data.stepCode < 6)
+        self.initWsConn()
     })
     this.data.wsConn.onOpen(function (errMsg) {
 
@@ -240,14 +272,16 @@ Page({
    * 生命周期函数--监听页面隐藏
    */
   onHide: function () {
-
+    if (this.data.wsConn) this.data.wsConn.close()
+    this.data.wsConn = null
   },
 
   /**
    * 生命周期函数--监听页面卸载
    */
   onUnload: function () {
-
+    if (this.data.wsConn) this.data.wsConn.close()
+    this.data.wsConn = null
   },
 
   /**

@@ -28,3 +28,27 @@
   border-radius: 50%;
 }
 
+.problem-box{
+  background-color: #F2F1D7;
+  height: 200rpx;
+  display: block;
+  margin-bottom: 10rpx;
+  border-radius: 5%
+}
+
+.problem-title {
+  text-align: center;
+  font-size: 52rpx;
+}
+
+.text-passed{
+  text-align: center;
+  color: red;
+  font-size: 64rpx
+}
+
+.nickname {
+  height: 128rpx;
+  border: #BF6 solid 1rpc;
+}
+

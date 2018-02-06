@@ -29,6 +29,7 @@ Page({
   doRegister: function () {
     var gd = app.globalData
     if (gd.openid && gd.userInfo && !gd.registerStat){
+      console.log(gd.userInfo)
       // 正在请求
       gd.registerStat = 1;
       wx.request({

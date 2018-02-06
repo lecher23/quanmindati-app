@@ -16,4 +16,5 @@
   <button wx:if="{{!processing}}" size='default' type='default' bindtap='prePbTap'> 上一题</button>
   <button wx:if="{{!processing}}" size='default' type='default' bindtap='nextPbTap'> {{nextTitle}}</button>
   <text wx:if="{{code}}">创建成功! 房间码: {{code}}</text>
+  <text wx:if="{{createMessage}}">创建失败: {{createMessage}}</text>
 </view>
