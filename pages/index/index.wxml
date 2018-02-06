@@ -7,8 +7,9 @@
       <text class="userinfo-nickname">{{userInfo.nickName}}</text>
     </block>
     <view class='box'>
-      <button class='btn' bindtap='addQuestionTap'>出题</button>
-      <button class='btn' bindtap='answerQuestionTap'>答题</button>
+      <button wx:if="{{logged}}" class='btn' bindtap='addQuestionTap'>出题</button>
+      <button wx:if="{{logged}}" class='btn' bindtap='answerQuestionTap'>答题</button>
+      <view wx:if="{{!logged}}">获取不到OPENID</view>
     </view>
   </view>
 </view>

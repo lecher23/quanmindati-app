@@ -24,7 +24,8 @@ Page({
     showStartBtn: true,
     responseCallback: null,
     roomMsg: '',
-    answerEnabled: true
+    answerEnabled: true,
+    result: null
   },
 
   resetTimer: function () {
@@ -48,9 +49,9 @@ Page({
       counter: data.duration,
       stepCode: data.st
     })
+    self.resetTimer()
     if (data.st == 1) {
       // 开始倒计时
-      self.resetTimer()
       self.setData({ roomStatus: '开始倒计时...' })
     } else if (data.st == 2) {
       self.setData({ roomStatus: '开始答题...' })
@@ -70,31 +71,35 @@ Page({
         ready: true,
         choicedIdx: null
       })
-      self.resetTimer()
     } else if (data.st == 3) {
       // 等待结果揭晓
       self.setData({ roomStatus: '等待结果...' })
     } else if (data.st == 4) {
       self.setData({ roomStatus: '结果揭晓...' })
       var rd = data.data
-      if (rd.answer != self.data.choicedIdx) {
-        var pb = self.data.problem
-        var choice = pb.choice
-        for (var i = 0; i < choice.length; ++i){
-          if (i == rd.answer) choice[i].cls = 'selected'
-          else if (i == self.data.choicedIdx) choice[i].cls = 'wrong'
-          choice[i].val = choice[i].val + '(0)'
-          for (var idx in rd.detail) if (idx == i) choice[i].val = choice[i].val + '(' + rd.detail[idx] + ')' 
-        }
-          
-        self.setData({
-          answerEnabled: false,
-          roomMsg: '回答错误!',
-          problem: pb
-        })
+      var pb = self.data.problem
+      var choice = pb.choice
+      for (var i = 0; i < choice.length; ++i) {
+        if (i == rd.answer) choice[i].cls = 'selected'
+        else if (i == self.data.choicedIdx) choice[i].cls = 'wrong'
+        var suffix = '(0)'
+        for (var idx in rd.detail) if (idx == i) suffix = '(' + rd.detail[idx] + ')'
+        choice[i].val = choice[i].val + suffix
       }
+
+      var passed = rd.answer != self.data.choicedIdx
+      self.setData({
+        answerEnabled: !passed,
+        roomMsg: passed ? '答对了!' : '回答错误!',
+        problem: pb
+      })
+
     } else if (data.st == 5) {
-      self.setData({ roomStatus: '总结...' })
+      self.setData({
+        roomStatus: '答题结束...',
+        result: data.data,
+        ready: false
+      })
     } else if (data.st == 6) {
       self.setData({ roomStatus: '等待关闭...' })
     }

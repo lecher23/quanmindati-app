@@ -1,19 +1,14 @@
 //app.js
 App({
   onLaunch: function () {
-    var s = '{"code": 3, "data": {"duration": 0, "owner": "oqBAK0bG0dVdWCQfc8G812Q1cM-w", "enable": true, "history": null, "st": 0}}'
-    console.log(JSON.parse(s))
     // 展示本地存储能力
     var self = this
     var logs = wx.getStorageSync('logs') || []
     logs.unshift(Date.now())
     wx.setStorageSync('logs', logs)
-    var user = wx.getStorageSync("user") || {}
-    console.log(user)
+    var user = wx.getStorageSync("user") || null
     var userInfo = wx.getStorageSync('userInfo') || {}
-    console.log(userInfo)
     if (!user.openid) {
-      console.log('get user info')
       wx.login({
         success: function (res) {
           if (res.code) {
@@ -25,8 +20,11 @@ App({
                 if (res.data.code == 200) {
                   var obj = {}
                   obj.openid = res.data.data
-                  console.log(obj)
                   wx.setStorageSync('user', obj)
+                  self.globalData.openid = obj.openid
+                  if (self.openidReadyCallback) {
+                    self.openidReadyCallback(obj.openid)
+                  }
                 }
               }
             })
@@ -35,15 +33,9 @@ App({
           }
         }
       })
+    } else {
+      self.globalData.openid = user.openid
     }
-    /**
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    })
-        */
 
     // 获取用户信息
     wx.getSetting({
@@ -54,7 +46,6 @@ App({
             success: res => {
               // 可以将 res 发送给后台解码出 unionId
               this.globalData.userInfo = res.userInfo
-
               // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
               // 所以此处加入 callback 以防止这种情况
               if (this.userInfoReadyCallback) {
@@ -71,7 +62,9 @@ App({
     drawConf: {
       problemNumber: 12,
       rewards: 100
-    }
+    },
+    openid: null,
+    registerStat: 0
   },
   gData: {
     enterCode: ''

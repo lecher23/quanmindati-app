@@ -2,14 +2,22 @@
 <view wx:if="{{processing}}">
   处理中...
 </view>
-<text>当前状态: {{roomStatus}}</text>
-<view>通知: {{roomMsg}}</view>
+<text>当前状态: {{roomStatus}}[{{counter}}]</text>
 <button style='primary' wx:if="{{user == roomOwner && stepCode == 0 && showStartBtn}}" bindtap='startRoomTap'>开始答题</button>
-<text wx:if="{{ready}}">倒计时: {{counter}}</text>
 <view wx:if="{{ready}}">
   <view>第 {{problem.index + 1}} 题:</view>
   <text>{{problem.content}}</text>
   <view wx:for="{{problem.choice}}" wx:key='idx'>
     <button class='{{item.cls}}' id="{{item.idx}}" bindtap='clickChoiceTap'>选项{{item.val}}</button>
+  </view>
+</view>
+<view wx:if="{{stepCode==5}}">
+  <view wx:if="{{answerEnabled}}">恭喜你!!!</view>
+  <view>总奖金: {{result.reward}}</view>
+  <view>通过数: {{result.passed.length}}</view>
+  <view>人均奖金: {{result.each}}</view>
+  <view wx:for="{{result.passed}}">
+    <image src="{{item.avatar}}" background-size="cover" class='userinfo-avatar'></image>
+    <view>{{item.name}}</view>
   </view>
 </view>
